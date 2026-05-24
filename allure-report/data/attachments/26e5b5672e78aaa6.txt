@@ -1,0 +1,10 @@
+
+=== Запуск браузера: firefox ===
+
+=== Создание пользователя: test_954b5707db6143d3959ad1cf797ebc52@test.com ===
+=== Пользователь test_954b5707db6143d3959ad1cf797ebc52@test.com успешно создан ===
+
+=== Удаление пользователя: test_954b5707db6143d3959ad1cf797ebc52@test.com ===
+=== Ошибка удаления: {"success":true,"message":"User successfully removed"} ===
+
+=== Закрытие браузера: firefox ===

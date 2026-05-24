@@ -1,0 +1,10 @@
+
+=== Запуск браузера: chrome ===
+
+=== Создание пользователя: test_befd108a701144cf9660df4efbdf1e1c@test.com ===
+=== Пользователь test_befd108a701144cf9660df4efbdf1e1c@test.com успешно создан ===
+
+=== Закрытие браузера: chrome ===
+
+=== Удаление пользователя: test_befd108a701144cf9660df4efbdf1e1c@test.com ===
+=== Ошибка удаления: {"success":true,"message":"User successfully removed"} ===

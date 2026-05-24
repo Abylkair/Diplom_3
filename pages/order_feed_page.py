@@ -1,0 +1,118 @@
+import allure
+import random
+import re
+from pages.base_page import BasePage
+from locators.order_feed_locators import OrderFeedLocators
+from locators.general_locators import GeneralLocators
+from data import URL
+
+class OrderFeedPage(BasePage):
+    
+    BASE_URL = URL.ORDER_FEED_PAGE
+    
+    def _get_random_order_locator(self):
+        orders_locator = OrderFeedLocators.LINK_ORDERS
+        self.wait_for_visibility(orders_locator)
+        orders = self.driver.find_elements(*orders_locator)
+        orders_count = len(orders)
+        if orders_count == 0:
+            raise AssertionError('Список заказов пуст')
+        index = random.randint(1, orders_count)
+        return orders_locator[0], f'{orders_locator[1]}[{index}]'
+    
+    @allure.step('Клик по случайному заказу')
+    def click_random_order(self):
+        locator = self._get_random_order_locator()
+        self.wait_for_visibility(locator)
+        self.click_to_element(locator)
+
+    @allure.step('Проверка отображения окна деталей заказа')
+    def is_details_popup_displayed(self):
+        try:
+            self.find_visible_element(OrderFeedLocators.SECTION_ORDER_DETAILS)
+            return True
+        except Exception:
+            return False
+
+    @allure.step('Проверка наличия заказа в ленте')
+    def is_order_exists(self, order_number):
+        orders_locator = OrderFeedLocators.LINK_ORDERS
+        self.wait_for_visibility(orders_locator)
+        orders = self.driver.find_elements(*orders_locator)
+        for order in orders:
+            if order.text.splitlines()[0] == order_number:
+                return True
+        return False
+    
+    @allure.step('Получение глобального счетчика заказов')
+    def get_orders_global_counter(self):
+        self.wait_for_visibility(OrderFeedLocators.P_ORDERS_GLOBAL_COUNTER)
+        return self.get_text_from_element(OrderFeedLocators.P_ORDERS_GLOBAL_COUNTER)
+    
+    @allure.step('Получение счетчика заказов за сегодня')
+    def get_orders_today_counter(self):
+        self.wait_for_visibility(OrderFeedLocators.P_ORDERS_TODAY_COUNTER)
+        return self.get_text_from_element(OrderFeedLocators.P_ORDERS_TODAY_COUNTER)
+    
+    @allure.step('Ожидание увеличения глобального счетчика')
+    def wait_for_global_counter_increase(self, expected_value):
+        self.wait.until(
+            lambda d: int(self.get_orders_global_counter()) > expected_value
+        )
+    
+    @allure.step('Ожидание увеличения счетчика за сегодня')
+    def wait_for_today_counter_increase(self, expected_value):
+        self.wait.until(
+            lambda d: int(self.get_orders_today_counter()) > expected_value
+        )
+    
+    @allure.step('Ожидание появления заказа в списке "В работе"')
+    def wait_for_order_in_progress(self, order_number):
+        self.wait.until(
+            lambda d: order_number in self.get_all_orders_in_progress_numbers_int()
+        )
+    
+    @allure.step('Получение номера заказа в работе')
+    def get_order_in_progress_number(self):
+        order_number_locator = OrderFeedLocators.LI_ORDERS_IN_PROGRESS
+        self.wait_for_visibility(order_number_locator)
+        self.wait.until_not(
+            lambda d: self.get_text_from_element(order_number_locator) in ['Все текущие заказы готовы!', '', None]
+        )
+        order_number = self.get_text_from_element(order_number_locator)
+        numbers = re.findall(r'\d+', order_number)
+        if numbers:
+            return numbers[0]
+        return order_number
+    
+    @allure.step('Получение всех номеров заказов в работе')
+    def get_all_orders_in_progress_numbers(self):
+        orders_locator = OrderFeedLocators.LI_ORDERS_IN_PROGRESS
+        self.wait_for_visibility(orders_locator)
+        self.wait.until_not(
+            lambda d: self.get_text_from_element(orders_locator) in ['Все текущие заказы готовы!', '', None]
+        )
+        order_elements = self.driver.find_elements(*OrderFeedLocators.LI_ORDERS_IN_PROGRESS)
+        order_numbers = []
+        for element in order_elements:
+            text = element.text
+            numbers = re.findall(r'\d+', text)
+            if numbers:
+                order_numbers.extend(numbers)
+        return order_numbers
+    
+    @allure.step('Получение всех номеров заказов в работе (числа)')
+    def get_all_orders_in_progress_numbers_int(self):
+        return [int(num) for num in self.get_all_orders_in_progress_numbers()]
+    
+    @allure.step('Переход на главную страницу')
+    def navigate_to_main_page(self):
+        self.click_to_element(GeneralLocators.LINK_CONSTRUCTOR)
+        from pages.main_page import MainPage
+        destination_page = MainPage(self.driver)
+        assert destination_page.is_loaded(), 'Главная страница не загрузилась'
+        return destination_page
+    
+    @allure.step('Проверка загрузки страницы')
+    def _verify_page_loaded(self):
+        return bool(self.find_visible_element(OrderFeedLocators.LINK_ORDER_FEED_ACTIVE))

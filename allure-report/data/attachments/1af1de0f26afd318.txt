@@ -1,0 +1,10 @@
+
+=== Запуск браузера: firefox ===
+
+=== Создание пользователя: test_a5ed16785b104ba288d9b75839858cd6@test.com ===
+=== Пользователь test_a5ed16785b104ba288d9b75839858cd6@test.com успешно создан ===
+
+=== Закрытие браузера: firefox ===
+
+=== Удаление пользователя: test_a5ed16785b104ba288d9b75839858cd6@test.com ===
+=== Ошибка удаления: {"success":true,"message":"User successfully removed"} ===

@@ -1,0 +1,10 @@
+
+=== Запуск браузера: firefox ===
+
+=== Создание пользователя: test_ca50ef50122c40c6ad9213767e43b82c@test.com ===
+=== Пользователь test_ca50ef50122c40c6ad9213767e43b82c@test.com успешно создан ===
+
+=== Закрытие браузера: firefox ===
+
+=== Удаление пользователя: test_ca50ef50122c40c6ad9213767e43b82c@test.com ===
+=== Ошибка удаления: {"success":true,"message":"User successfully removed"} ===

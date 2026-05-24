@@ -1,0 +1,10 @@
+
+=== Запуск браузера: chrome ===
+
+=== Создание пользователя: test_1d8d0bc94dec47038c492edc681ef41e@test.com ===
+=== Пользователь test_1d8d0bc94dec47038c492edc681ef41e@test.com успешно создан ===
+
+=== Закрытие браузера: chrome ===
+
+=== Удаление пользователя: test_1d8d0bc94dec47038c492edc681ef41e@test.com ===
+=== Ошибка удаления: {"success":true,"message":"User successfully removed"} ===
