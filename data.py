@@ -1,5 +1,4 @@
 class URL:
-    
     BASE_URL = 'https://qa-stellarburgers.education-services.ru'
     
     MAIN_PAGE = f'{BASE_URL}'
@@ -14,7 +13,5 @@ class URL:
 
 
 class UserData:
-    
     DEFAULT_PASSWORD = 'password'
     DEFAULT_NAME = 'Test User'
-

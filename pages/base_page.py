@@ -9,8 +9,7 @@ class BasePage:
     
     def __init__(self, driver: WebDriver):
         self.driver = driver
-        self.timeout = 10
-        self.wait = WebDriverWait(self.driver, self.timeout)
+        self.wait = WebDriverWait(self.driver, 10)
 
     def open(self):
         if self.BASE_URL:
@@ -23,15 +22,13 @@ class BasePage:
 
     def find_visible_element(self, locator):
         try:
-            element = self.wait_for_visibility(locator)
-            return element
+            return self.wait_for_visibility(locator)
         except Exception:
             return None
 
     def find_invisible_element(self, locator):
         try:
-            element = self.wait.until(ec.presence_of_element_located(locator))
-            return element
+            return self.wait.until(ec.presence_of_element_located(locator))
         except Exception:
             return None
     
@@ -48,7 +45,7 @@ class BasePage:
                 actions = ActionChains(self.driver)
                 actions.move_to_element(element).perform()
             except Exception:
-                self.driver.execute_script("arguments[0].scrollIntoView();", element)
+                self.execute_script("arguments[0].scrollIntoView();", element)
 
     def click_to_element(self, locator):
         element = self.wait.until(ec.element_to_be_clickable(locator))
@@ -56,7 +53,7 @@ class BasePage:
         try:
             element.click()
         except Exception:
-            self.driver.execute_script("arguments[0].click();", element)
+            self.execute_script("arguments[0].click();", element)
 
     def set_text_to_element(self, locator, text):
         element = self.find_visible_element(locator)
@@ -65,10 +62,39 @@ class BasePage:
             element.send_keys(text)
     
     def get_text_from_element(self, locator):
-        element = self.find_visible_element(locator)
-        if element:
-            return element.text
+        try:
+            element = self.find_visible_element(locator)
+            if element:
+                return element.text
+        except Exception:
+            pass
         return None
+
+    def execute_script(self, script, *args):
+        return self.driver.execute_script(script, *args)
+
+    def drag_and_drop(self, source_locator, target_locator):
+        source = self.wait_for_visibility(source_locator)
+        target = self.wait_for_visibility(target_locator)
+        self.execute_script("""
+            var source = arguments[0];
+            var target = arguments[1];
+            var evt = document.createEvent("DragEvent");
+            evt.initMouseEvent("dragstart", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            source.dispatchEvent(evt);
+            evt = document.createEvent("DragEvent");
+            evt.initMouseEvent("dragenter", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            target.dispatchEvent(evt);
+            evt = document.createEvent("DragEvent");
+            evt.initMouseEvent("dragover", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            target.dispatchEvent(evt);
+            evt = document.createEvent("DragEvent");
+            evt.initMouseEvent("drop", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            target.dispatchEvent(evt);
+            evt = document.createEvent("DragEvent");
+            evt.initMouseEvent("dragend", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            source.dispatchEvent(evt);
+        """, source, target)
 
     def _verify_page_loaded(self) -> bool:
         return True

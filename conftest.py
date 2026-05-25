@@ -8,6 +8,14 @@ from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
 
+from pages.login_page import LoginPage
+from pages.profile_page import ProfilePage
+from pages.forgot_password_page import ForgotPasswordPage
+from pages.main_page import MainPage
+from pages.order_feed_page import OrderFeedPage
+from helpers import generate_unique_email
+from data import URL
+
 @pytest.fixture(params=['chrome', 'firefox'])
 def driver(request):
     browser = request.param
@@ -15,8 +23,6 @@ def driver(request):
     
     browser_width = 1400
     browser_height = 800
-    
-    print(f"\n=== Запуск браузера: {browser} ===")
     
     if browser == 'chrome':
         options = ChromeOptions()
@@ -32,50 +38,43 @@ def driver(request):
         options.add_argument("--private")
         options.add_argument(f"--width={browser_width}")
         options.add_argument(f"--height={browser_height}")
+        options.set_preference("browser.tabs.remote.autostart", False)
+        options.set_preference("browser.tabs.remote.autostart.2", False)
         service = FirefoxService(GeckoDriverManager().install())
         driver_instance = webdriver.Firefox(service=service, options=options)
     
+    driver_instance.implicitly_wait(5)
     yield driver_instance
-    
-    print(f"\n=== Закрытие браузера: {browser} ===")
     driver_instance.quit()
 
 
 @pytest.fixture
 def login_page(driver):
-    from pages.login_page import LoginPage
     return LoginPage(driver)
 
 
 @pytest.fixture
 def profile_page(driver):
-    from pages.profile_page import ProfilePage
     return ProfilePage(driver)
 
 
 @pytest.fixture
 def forgot_password_page(driver):
-    from pages.forgot_password_page import ForgotPasswordPage
     return ForgotPasswordPage(driver)
 
 
 @pytest.fixture
 def main_page(driver):
-    from pages.main_page import MainPage
     return MainPage(driver)
 
 
 @pytest.fixture
 def order_feed_page(driver):
-    from pages.order_feed_page import OrderFeedPage
     return OrderFeedPage(driver)
 
 
 @pytest.fixture
 def create_user():
-    from helpers import generate_unique_email
-    from data import URL
-    
     users_to_delete = []
 
     def _create_user():
@@ -88,8 +87,6 @@ def create_user():
             'name': 'Test User'
         }
         
-        print(f"\n=== Создание пользователя: {email} ===")
-        
         response = requests.post(
             url=f'{URL.API_AUTH}/register',
             json=payload
@@ -97,30 +94,22 @@ def create_user():
         
         if response.status_code == 200:
             users_to_delete.append(email)
-            print(f"=== Пользователь {email} успешно создан ===")
             return email, password
-        else:
-            print(f"=== Ошибка создания пользователя: {response.text} ===")
-            raise Exception(f"Failed to create user: {response.text}")
+        raise Exception(f"Failed to create user: {response.text}")
     
     yield _create_user
     
     for email in users_to_delete:
         try:
-            print(f"\n=== Удаление пользователя: {email} ===")
             login_response = requests.post(
                 url=f'{URL.API_AUTH}/login',
                 json={'email': email, 'password': 'password'}
             )
             if login_response.status_code == 200:
                 token = login_response.json()['accessToken']
-                delete_response = requests.delete(
+                requests.delete(
                     url=f'{URL.API_AUTH}/user',
                     headers={'Authorization': token}
                 )
-                if delete_response.status_code == 200:
-                    print(f"=== Пользователь {email} успешно удален ===")
-                else:
-                    print(f"=== Ошибка удаления: {delete_response.text} ===")
-        except Exception as e:
-            print(f"\n=== Не удалось удалить {email}: {e} ===")
+        except Exception:
+            pass

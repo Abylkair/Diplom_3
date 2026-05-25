@@ -1,6 +1,7 @@
 import allure
 import random
 import re
+from selenium.webdriver.support import expected_conditions as ec
 from pages.base_page import BasePage
 from locators.order_feed_locators import OrderFeedLocators
 from locators.general_locators import GeneralLocators
@@ -39,8 +40,11 @@ class OrderFeedPage(BasePage):
         orders_locator = OrderFeedLocators.LINK_ORDERS
         self.wait_for_visibility(orders_locator)
         orders = self.driver.find_elements(*orders_locator)
+        clean_number = str(int(order_number))
         for order in orders:
-            if order.text.splitlines()[0] == order_number:
+            order_text = order.text.splitlines()[0]
+            order_clean = order_text.lstrip('#').lstrip('0')
+            if order_clean == clean_number:
                 return True
         return False
     
@@ -66,44 +70,23 @@ class OrderFeedPage(BasePage):
             lambda d: int(self.get_orders_today_counter()) > expected_value
         )
     
-    @allure.step('Ожидание появления заказа в списке "В работе"')
-    def wait_for_order_in_progress(self, order_number):
-        self.wait.until(
-            lambda d: order_number in self.get_all_orders_in_progress_numbers_int()
-        )
-    
-    @allure.step('Получение номера заказа в работе')
-    def get_order_in_progress_number(self):
-        order_number_locator = OrderFeedLocators.LI_ORDERS_IN_PROGRESS
-        self.wait_for_visibility(order_number_locator)
-        self.wait.until_not(
-            lambda d: self.get_text_from_element(order_number_locator) in ['Все текущие заказы готовы!', '', None]
-        )
-        order_number = self.get_text_from_element(order_number_locator)
-        numbers = re.findall(r'\d+', order_number)
-        if numbers:
-            return numbers[0]
-        return order_number
-    
     @allure.step('Получение всех номеров заказов в работе')
     def get_all_orders_in_progress_numbers(self):
-        orders_locator = OrderFeedLocators.LI_ORDERS_IN_PROGRESS
-        self.wait_for_visibility(orders_locator)
-        self.wait.until_not(
-            lambda d: self.get_text_from_element(orders_locator) in ['Все текущие заказы готовы!', '', None]
-        )
-        order_elements = self.driver.find_elements(*OrderFeedLocators.LI_ORDERS_IN_PROGRESS)
-        order_numbers = []
-        for element in order_elements:
-            text = element.text
-            numbers = re.findall(r'\d+', text)
-            if numbers:
-                order_numbers.extend(numbers)
-        return order_numbers
-    
-    @allure.step('Получение всех номеров заказов в работе (числа)')
-    def get_all_orders_in_progress_numbers_int(self):
-        return [int(num) for num in self.get_all_orders_in_progress_numbers()]
+        try:
+            self.wait_for_visibility(OrderFeedLocators.LI_ORDERS_IN_PROGRESS)
+            order_elements = self.driver.find_elements(*OrderFeedLocators.LI_ORDERS_IN_PROGRESS)
+            order_numbers = []
+            for element in order_elements:
+                try:
+                    text = element.text
+                    numbers = re.findall(r'\d+', text)
+                    if numbers:
+                        order_numbers.extend(numbers)
+                except Exception:
+                    continue
+            return order_numbers
+        except Exception:
+            return []
     
     @allure.step('Переход на главную страницу')
     def navigate_to_main_page(self):

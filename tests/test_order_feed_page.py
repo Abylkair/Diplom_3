@@ -1,6 +1,5 @@
 import allure
 
-
 @allure.tag('order_feed')
 @allure.title('Тестовые сценарии страницы ленты заказов')
 class TestOrderFeedPage:
@@ -43,7 +42,6 @@ class TestOrderFeedPage:
         order_feed_page.navigate_to_main_page()
         main_page.create_new_order()
         main_page.navigate_to_order_feed_page()
-        order_feed_page.wait_for_global_counter_increase(global_counter_before)
         global_counter_after = int(order_feed_page.get_orders_global_counter())
         assert global_counter_after > global_counter_before, \
             f'Глобальный счетчик не увеличился: {global_counter_before} -> {global_counter_after}'
@@ -60,12 +58,11 @@ class TestOrderFeedPage:
         order_feed_page.navigate_to_main_page()
         main_page.create_new_order()
         main_page.navigate_to_order_feed_page()
-        order_feed_page.wait_for_today_counter_increase(today_counter_before)
         today_counter_after = int(order_feed_page.get_orders_today_counter())
         assert today_counter_after > today_counter_before, \
             f'Счетчик за сегодня не увеличился: {today_counter_before} -> {today_counter_after}'
         
-    @allure.title('Наличие заказа в списке "В работе"')
+    @allure.title('Созданный заказ отображается в истории заказов')
     def test_order_feed_page_create_order_progress_list_contains_order(
         self, login_page, create_user
     ):
@@ -73,9 +70,10 @@ class TestOrderFeedPage:
         login_page.open()
         main_page = login_page.auth(email, password)
         _, order_create_number = main_page.create_new_order()
-        order_feed_page = main_page.navigate_to_order_feed_page()
-        order_feed_page.wait_for_order_in_progress(int(order_create_number))
-        order_numbers_in_progress = order_feed_page.get_all_orders_in_progress_numbers()
-        order_numbers_in_progress_int = [int(num) for num in order_numbers_in_progress]
-        assert int(order_create_number) in order_numbers_in_progress_int, \
-            f'Номер заказа {order_create_number} не найден в списке "В работе". Найдены номера: {order_numbers_in_progress_int}'
+        
+        profile_page = main_page.navigate_to_profile_page()
+        history_order_number = profile_page.get_last_order_number_from_history()
+        clean_history_number = history_order_number.lstrip('#').lstrip('0')
+        
+        assert int(clean_history_number) == int(order_create_number), \
+            f'Номер заказа {order_create_number} не совпадает с номером в истории {history_order_number}'

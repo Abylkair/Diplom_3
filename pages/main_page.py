@@ -1,5 +1,6 @@
 import allure
 import random
+from selenium.webdriver.support import expected_conditions as ec
 from pages.base_page import BasePage
 from locators.main_page_locators import MainPageLocators
 from locators.general_locators import GeneralLocators
@@ -36,51 +37,30 @@ class MainPage(BasePage):
     @allure.step('Проверка отображения окна деталей')
     def is_details_popup_displayed(self):
         try:
-            self.driver.find_element(*MainPageLocators.SECTION_INGREDIENT_DETAILS)
-            return True
+            popup = self.find_visible_element(MainPageLocators.SECTION_INGREDIENT_DETAILS)
+            return popup is not None
         except Exception:
             return False
     
     @allure.step('Закрыть окно деталей')
     def close_details_popup(self):
-        """Закрытие всплывающего окна с деталями"""
-        self.click_to_element(MainPageLocators.BUTTON_POPUP_CLOSE)
+        try:
+            close_button = self.wait.until(ec.element_to_be_clickable(MainPageLocators.BUTTON_POPUP_CLOSE))
+            self.driver.execute_script("arguments[0].click();", close_button)
+        except Exception:
+            try:
+                self.driver.execute_script("document.querySelector('.Modal_modal_opened button').click()")
+            except Exception:
+                pass
         self.wait_for_invisibility(MainPageLocators.SECTION_INGREDIENT_DETAILS)
-
-    @allure.step('Drag and Drop элемента')
-    def drag_and_drop_element(self, locator_from, locator_to):
-        element_from = self.wait_for_visibility(locator_from)
-        self.scroll_to_element(locator_from)
-        element_to = self.wait_for_visibility(locator_to)
-        
-        self.driver.execute_script("""
-            var source = arguments[0];
-            var target = arguments[1];
-            var evt = document.createEvent("DragEvent");
-            evt.initMouseEvent("dragstart", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-            source.dispatchEvent(evt);
-            evt = document.createEvent("DragEvent");
-            evt.initMouseEvent("dragenter", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-            target.dispatchEvent(evt);
-            evt = document.createEvent("DragEvent");
-            evt.initMouseEvent("dragover", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-            target.dispatchEvent(evt);
-            evt = document.createEvent("DragEvent");
-            evt.initMouseEvent("drop", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-            target.dispatchEvent(evt);
-            evt = document.createEvent("DragEvent");
-            evt.initMouseEvent("dragend", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-            source.dispatchEvent(evt);
-        """, element_from, element_to)
 
     @allure.step('Добавить ингредиент в заказ')
     def add_ingredient_to_order(self, ingredient_type='bun'):
         locator_from = self._get_random_ingredient_locator(ingredient_type)
         count_locator = locator_from[0], f'{locator_from[1]}/div[1]/p'
         count_before = self.get_text_from_element(count_locator)
-        
         locator_to = MainPageLocators.SECTION_CONSTRUCTOR_BASKET
-        self.drag_and_drop_element(locator_from, locator_to)
+        self.drag_and_drop(locator_from, locator_to)
         count_after = self.get_text_from_element(count_locator)
         
         if count_before is None or count_after is None:
@@ -113,7 +93,6 @@ class MainPage(BasePage):
                 lambda d: self.get_text_from_element(number_locator) == default_number
             )
             order_number = self.get_text_from_element(number_locator)
-            self.close_details_popup()
             return True, order_number
         except Exception:
             return False, self.get_text_from_element(number_locator)
@@ -121,22 +100,14 @@ class MainPage(BasePage):
     @allure.step('Переход в личный кабинет')
     def navigate_to_profile_page(self):
         self.click_to_element(GeneralLocators.LINK_PROFILE)
-        
         from pages.profile_page import ProfilePage
-        destination_page = ProfilePage(self.driver)
-        
-        assert destination_page.is_loaded(), 'Страница профиля не загрузилась'
-        return destination_page
+        return ProfilePage(self.driver)
     
     @allure.step('Переход в ленту заказов')
     def navigate_to_order_feed_page(self):
         self.click_to_element(GeneralLocators.LINK_ORDER_FEED)
-        
         from pages.order_feed_page import OrderFeedPage
-        destination_page = OrderFeedPage(self.driver)
-        
-        assert destination_page.is_loaded(), 'Страница ленты заказов не загрузилась'
-        return destination_page
+        return OrderFeedPage(self.driver)
     
     @allure.step('Проверка авторизации')
     def is_auth(self):

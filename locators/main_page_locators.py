@@ -1,7 +1,6 @@
 from selenium.webdriver.common.by import By
 
 class MainPageLocators:
-
     LINK_CONSTRUCTOR_ACTIVE = By.XPATH, ".//a[@aria-current='page']/p[text()='Конструктор']"
     BUTTON_CREATE_ORDER = By.XPATH, ".//button[text()='Оформить заказ']"
     LINK_INGREDIENTS = By.XPATH, "(.//a[contains(@class, 'BurgerIngredient_ingredient')])"

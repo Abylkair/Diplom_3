@@ -5,7 +5,7 @@ from locators.general_locators import GeneralLocators
 from data import URL
 
 class ProfilePage(BasePage):
-
+    
     BASE_URL = URL.PROFILE_PAGE
 
     @allure.step('Показать историю заказов')
@@ -13,14 +13,15 @@ class ProfilePage(BasePage):
         self.click_to_element(ProfilePageLocators.LINK_HISTORY)
         self.wait_for_invisibility(ProfilePageLocators.DIV_LOADING)
     
-    @allure.step('Проверка отображения истории заказов')
+    @allure.step('Проверка отображения истории заказов')    
     def is_orders_history_displayed(self):
         return bool(self.find_invisible_element(ProfilePageLocators.DIV_ORDER_HISTORY))
     
     @allure.step('Получение последнего номера заказа из истории')
     def get_last_order_number_from_history(self):
         self.show_orders_history()
-        return self.get_text_from_element(ProfilePageLocators.P_ORDER_HISTORY_ITEM_TEXT)
+        order_text = self.get_text_from_element(ProfilePageLocators.P_ORDER_HISTORY_ITEM_TEXT)
+        return order_text.lstrip('#').lstrip('0')
 
     @allure.step('Выход из системы')
     def logout(self):
@@ -29,10 +30,8 @@ class ProfilePage(BasePage):
     @allure.step('Переход в ленту заказов')
     def navigate_to_order_feed_page(self):
         self.click_to_element(GeneralLocators.LINK_ORDER_FEED)
-        
         from pages.order_feed_page import OrderFeedPage
         destination_page = OrderFeedPage(self.driver)
-        
         assert destination_page.is_loaded(), 'Страница ленты заказов не загрузилась'
         return destination_page
             
