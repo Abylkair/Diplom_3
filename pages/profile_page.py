@@ -27,13 +27,10 @@ class ProfilePage(BasePage):
     def logout(self):
         self.click_to_element(ProfilePageLocators.BUTTON_LOGOUT)
     
-    @allure.step('Переход в ленту заказов')
-    def navigate_to_order_feed_page(self):
+    @allure.step('Клик по ссылке ленты заказов')
+    def click_order_feed_link(self):
         self.click_to_element(GeneralLocators.LINK_ORDER_FEED)
-        from pages.order_feed_page import OrderFeedPage
-        destination_page = OrderFeedPage(self.driver)
-        assert destination_page.is_loaded(), 'Страница ленты заказов не загрузилась'
-        return destination_page
+        return self
             
     @allure.step('Проверка загрузки страницы')
     def _verify_page_loaded(self):

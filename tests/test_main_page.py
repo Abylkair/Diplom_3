@@ -1,5 +1,9 @@
+# test_main_page.py
 import allure
 import pytest
+from pages.main_page import MainPage
+from pages.order_feed_page import OrderFeedPage
+from pages.profile_page import ProfilePage
 
 @allure.tag('main')
 @allure.title('Тестовые сценарии главной страницы')
@@ -9,8 +13,8 @@ class TestMainPage:
     @allure.description('Открыть страницу ленты заказов, перейти на главную страницу')
     def test_main_page_open_from_order_feed_page_success(self, order_feed_page):
         order_feed_page.open()
-        
-        main_page = order_feed_page.navigate_to_main_page()
+        order_feed_page.click_constructor_link()
+        main_page = MainPage(order_feed_page.driver)
         
         assert main_page.is_loaded(), 'Главная страница не загрузилась'
     
@@ -50,7 +54,8 @@ class TestMainPage:
         email, password = create_user()
         login_page.open()
         
-        main_page = login_page.auth(email, password)
+        login_page.auth(email, password)
+        main_page = MainPage(login_page.driver)
         is_success, order_number = main_page.create_new_order(ingredient_count)
         
         assert is_success, 'Заказ не был создан'

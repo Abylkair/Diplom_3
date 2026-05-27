@@ -1,4 +1,5 @@
 import allure
+from pages.main_page import MainPage
 
 @allure.tag('login')
 @allure.title('Тестовые сценарии страницы логина')
@@ -17,7 +18,8 @@ class TestLoginPage:
         email, password = create_user()
         login_page.open()
         
-        main_page = login_page.auth(email, password)
+        login_page.auth(email, password)
+        main_page = MainPage(login_page.driver)
         
         assert main_page.is_loaded(), 'Главная страница не загрузилась после авторизации'
         assert main_page.is_auth(), 'Пользователь не авторизован'

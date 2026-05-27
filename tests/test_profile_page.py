@@ -1,4 +1,7 @@
 import allure
+from pages.main_page import MainPage
+from pages.profile_page import ProfilePage
+from pages.login_page import LoginPage
 
 
 @allure.tag('profile')
@@ -10,9 +13,11 @@ class TestProfilePage:
     def test_profile_page_open_success(self, create_user, login_page):
         email, password = create_user()
         login_page.open()
-        main_page = login_page.auth(email, password)
+        login_page.auth(email, password)
+        main_page = MainPage(login_page.driver)
         
-        profile_page = main_page.navigate_to_profile_page()
+        main_page.click_profile_link()
+        profile_page = ProfilePage(main_page.driver)
         
         assert profile_page.is_loaded(), 'Страница профиля не загрузилась'
         
@@ -21,9 +26,11 @@ class TestProfilePage:
     def test_profile_page_show_orders_history_success(self, create_user, login_page):
         email, password = create_user()
         login_page.open()
-        main_page = login_page.auth(email, password)
+        login_page.auth(email, password)
+        main_page = MainPage(login_page.driver)
         main_page.create_new_order()
-        profile_page = main_page.navigate_to_profile_page()
+        main_page.click_profile_link()
+        profile_page = ProfilePage(main_page.driver)
         
         profile_page.show_orders_history()
         
@@ -34,8 +41,10 @@ class TestProfilePage:
     def test_profile_page_logout_success(self, create_user, login_page):
         email, password = create_user()
         login_page.open()
-        main_page = login_page.auth(email, password)
-        profile_page = main_page.navigate_to_profile_page()
+        login_page.auth(email, password)
+        main_page = MainPage(login_page.driver)
+        main_page.click_profile_link()
+        profile_page = ProfilePage(main_page.driver)
         
         profile_page.logout()
         

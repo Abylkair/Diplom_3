@@ -11,27 +11,19 @@ class LoginPage(BasePage):
     def auth(self, email, password):
         self.set_text_to_element(LoginPageLocators.INPUT_EMAIL, email)
         self.set_text_to_element(LoginPageLocators.INPUT_PASSWORD, password)
-        return self.navigate_to_main_page()
+        self.click_to_element(LoginPageLocators.BUTTON_LOGIN)
+        return self
+    
+    @allure.step('Клик по ссылке восстановления пароля')
+    def click_restore_password_link(self):
+        self.click_to_element(LoginPageLocators.LINK_RESTORE_PASSWORD)
+        return self
     
     @allure.step('Переход на страницу восстановления пароля')
     def navigate_to_forgot_password_page(self):
         self.click_to_element(LoginPageLocators.LINK_RESTORE_PASSWORD)
-        
         from pages.forgot_password_page import ForgotPasswordPage
-        destination_page = ForgotPasswordPage(self.driver)
-        
-        assert destination_page.is_loaded(), 'Страница восстановления пароля не загрузилась'
-        return destination_page
-
-    @allure.step('Переход на главную страницу')
-    def navigate_to_main_page(self):
-        self.click_to_element(LoginPageLocators.BUTTON_LOGIN)
-        
-        from pages.main_page import MainPage
-        destination_page = MainPage(self.driver)
-        
-        assert destination_page.is_loaded(), 'Главная страница не загрузилась'
-        return destination_page
+        return ForgotPasswordPage(self.driver)
     
     @allure.step('Проверка загрузки страницы')
     def _verify_page_loaded(self):

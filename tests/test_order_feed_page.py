@@ -1,4 +1,7 @@
 import allure
+from pages.main_page import MainPage
+from pages.order_feed_page import OrderFeedPage
+from pages.profile_page import ProfilePage
 
 @allure.tag('order_feed')
 @allure.title('Тестовые сценарии страницы ленты заказов')
@@ -7,7 +10,8 @@ class TestOrderFeedPage:
     @allure.title('Переход на страницу ленты заказов с главной страницы')
     def test_order_feed_page_open_from_main_page_success(self, main_page):
         main_page.open()
-        order_feed_page = main_page.navigate_to_order_feed_page()
+        main_page.click_order_feed_link()
+        order_feed_page = OrderFeedPage(main_page.driver)
         assert order_feed_page.is_loaded(), 'Страница ленты заказов не загрузилась'
         
     @allure.title('Появление окна с деталями заказа')
@@ -22,11 +26,14 @@ class TestOrderFeedPage:
     ):
         email, password = create_user()
         login_page.open()
-        main_page = login_page.auth(email, password)
+        login_page.auth(email, password)
+        main_page = MainPage(login_page.driver)
         main_page.create_new_order()
-        profile_page = main_page.navigate_to_profile_page()
+        main_page.click_profile_link()
+        profile_page = ProfilePage(main_page.driver)
         order_number = profile_page.get_last_order_number_from_history()
-        order_feed_page = profile_page.navigate_to_order_feed_page()
+        profile_page.click_order_feed_link()
+        order_feed_page = OrderFeedPage(profile_page.driver)
         assert order_feed_page.is_order_exists(order_number), \
             f'Заказ {order_number} не найден в ленте заказов'
         
@@ -36,12 +43,16 @@ class TestOrderFeedPage:
     ):
         email, password = create_user()
         login_page.open()
-        main_page = login_page.auth(email, password)
-        order_feed_page = main_page.navigate_to_order_feed_page()
+        login_page.auth(email, password)
+        main_page = MainPage(login_page.driver)
+        main_page.click_order_feed_link()
+        order_feed_page = OrderFeedPage(main_page.driver)
         global_counter_before = int(order_feed_page.get_orders_global_counter())
-        order_feed_page.navigate_to_main_page()
+        order_feed_page.click_constructor_link()
+        main_page = MainPage(order_feed_page.driver)
         main_page.create_new_order()
-        main_page.navigate_to_order_feed_page()
+        main_page.click_order_feed_link()
+        order_feed_page = OrderFeedPage(main_page.driver)
         global_counter_after = int(order_feed_page.get_orders_global_counter())
         assert global_counter_after > global_counter_before, \
             f'Глобальный счетчик не увеличился: {global_counter_before} -> {global_counter_after}'
@@ -52,12 +63,16 @@ class TestOrderFeedPage:
     ):
         email, password = create_user()
         login_page.open()
-        main_page = login_page.auth(email, password)
-        order_feed_page = main_page.navigate_to_order_feed_page()
+        login_page.auth(email, password)
+        main_page = MainPage(login_page.driver)
+        main_page.click_order_feed_link()
+        order_feed_page = OrderFeedPage(main_page.driver)
         today_counter_before = int(order_feed_page.get_orders_today_counter())
-        order_feed_page.navigate_to_main_page()
+        order_feed_page.click_constructor_link()
+        main_page = MainPage(order_feed_page.driver)
         main_page.create_new_order()
-        main_page.navigate_to_order_feed_page()
+        main_page.click_order_feed_link()
+        order_feed_page = OrderFeedPage(main_page.driver)
         today_counter_after = int(order_feed_page.get_orders_today_counter())
         assert today_counter_after > today_counter_before, \
             f'Счетчик за сегодня не увеличился: {today_counter_before} -> {today_counter_after}'
@@ -68,10 +83,12 @@ class TestOrderFeedPage:
     ):
         email, password = create_user()
         login_page.open()
-        main_page = login_page.auth(email, password)
+        login_page.auth(email, password)
+        main_page = MainPage(login_page.driver)
         _, order_create_number = main_page.create_new_order()
         
-        profile_page = main_page.navigate_to_profile_page()
+        main_page.click_profile_link()
+        profile_page = ProfilePage(main_page.driver)
         history_order_number = profile_page.get_last_order_number_from_history()
         clean_history_number = history_order_number.lstrip('#').lstrip('0')
         

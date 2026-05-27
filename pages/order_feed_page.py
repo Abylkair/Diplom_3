@@ -88,13 +88,10 @@ class OrderFeedPage(BasePage):
         except Exception:
             return []
     
-    @allure.step('Переход на главную страницу')
-    def navigate_to_main_page(self):
+    @allure.step('Клик по ссылке конструктора')
+    def click_constructor_link(self):
         self.click_to_element(GeneralLocators.LINK_CONSTRUCTOR)
-        from pages.main_page import MainPage
-        destination_page = MainPage(self.driver)
-        assert destination_page.is_loaded(), 'Главная страница не загрузилась'
-        return destination_page
+        return self
     
     @allure.step('Проверка загрузки страницы')
     def _verify_page_loaded(self):

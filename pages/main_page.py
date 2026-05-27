@@ -45,11 +45,11 @@ class MainPage(BasePage):
     @allure.step('Закрыть окно деталей')
     def close_details_popup(self):
         try:
-            close_button = self.wait.until(ec.element_to_be_clickable(MainPageLocators.BUTTON_POPUP_CLOSE))
-            self.driver.execute_script("arguments[0].click();", close_button)
+            close_button = self.wait_for_element_clickable(MainPageLocators.BUTTON_POPUP_CLOSE)
+            self.execute_script("arguments[0].click();", close_button)
         except Exception:
             try:
-                self.driver.execute_script("document.querySelector('.Modal_modal_opened button').click()")
+                self.execute_script("document.querySelector('.Modal_modal_opened button').click()")
             except Exception:
                 pass
         self.wait_for_invisibility(MainPageLocators.SECTION_INGREDIENT_DETAILS)
@@ -97,17 +97,20 @@ class MainPage(BasePage):
         except Exception:
             return False, self.get_text_from_element(number_locator)
 
-    @allure.step('Переход в личный кабинет')
-    def navigate_to_profile_page(self):
+    @allure.step('Клик по ссылке профиля')
+    def click_profile_link(self):
         self.click_to_element(GeneralLocators.LINK_PROFILE)
-        from pages.profile_page import ProfilePage
-        return ProfilePage(self.driver)
+        return self
     
-    @allure.step('Переход в ленту заказов')
-    def navigate_to_order_feed_page(self):
+    @allure.step('Клик по ссылке ленты заказов')
+    def click_order_feed_link(self):
         self.click_to_element(GeneralLocators.LINK_ORDER_FEED)
-        from pages.order_feed_page import OrderFeedPage
-        return OrderFeedPage(self.driver)
+        return self
+    
+    @allure.step('Клик по ссылке конструктора')
+    def click_constructor_link(self):
+        self.click_to_element(GeneralLocators.LINK_CONSTRUCTOR)
+        return self
     
     @allure.step('Проверка авторизации')
     def is_auth(self):

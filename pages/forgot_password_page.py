@@ -23,3 +23,7 @@ class ForgotPasswordPage(BasePage):
             self.find_visible_element(ForgotPasswordPageLocators.BUTTON_SUBMIT_RESTORE)
         ]
         return all(conditions)
+    
+    @allure.step('Получить текущий URL')
+    def get_current_url(self):
+        return self.driver.current_url

@@ -13,8 +13,10 @@ from pages.profile_page import ProfilePage
 from pages.forgot_password_page import ForgotPasswordPage
 from pages.main_page import MainPage
 from pages.order_feed_page import OrderFeedPage
+from pages.reset_password_page import ResetPasswordPage
 from helpers import generate_unique_email
 from data import URL
+
 
 @pytest.fixture(params=['chrome', 'firefox'])
 def driver(request):
@@ -71,6 +73,11 @@ def main_page(driver):
 @pytest.fixture
 def order_feed_page(driver):
     return OrderFeedPage(driver)
+
+
+@pytest.fixture
+def reset_password_page(driver):
+    return ResetPasswordPage(driver)
 
 
 @pytest.fixture

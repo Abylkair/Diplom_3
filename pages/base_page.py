@@ -96,6 +96,12 @@ class BasePage:
             source.dispatchEvent(evt);
         """, source, target)
 
+    def wait_for_element_clickable(self, locator):
+        return self.wait.until(ec.element_to_be_clickable(locator))
+
+    def get_current_url(self):
+        return self.driver.current_url
+
     def _verify_page_loaded(self) -> bool:
         return True
 

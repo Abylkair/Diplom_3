@@ -1,4 +1,5 @@
 import allure
+from pages.forgot_password_page import ForgotPasswordPage
 from pages.reset_password_page import ResetPasswordPage
 
 @allure.tag('password_restore')
